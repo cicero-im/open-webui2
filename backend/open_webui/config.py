@@ -8,8 +8,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Generic, Optional, TypeVar
 from urllib.parse import urlparse
-
-import requests
 from pydantic import BaseModel
 from sqlalchemy import JSON, Column, DateTime, Integer, func
 
@@ -26,6 +24,7 @@ from open_webui.env import (
     log,
 )
 from open_webui.internal.db import Base, get_db
+from security import safe_requests
 
 
 class EndpointFilter(logging.Filter):
@@ -631,7 +630,7 @@ CUSTOM_NAME = os.environ.get("CUSTOM_NAME", "")
 
 if CUSTOM_NAME:
     try:
-        r = requests.get(f"https://api.openwebui.com/api/v1/custom/{CUSTOM_NAME}")
+        r = safe_requests.get(f"https://api.openwebui.com/api/v1/custom/{CUSTOM_NAME}")
         data = r.json()
         if r.ok:
             if "logo" in data:
@@ -641,7 +640,7 @@ if CUSTOM_NAME:
                     else data["logo"]
                 )
 
-                r = requests.get(url, stream=True)
+                r = safe_requests.get(url, stream=True)
                 if r.status_code == 200:
                     with open(f"{STATIC_DIR}/favicon.png", "wb") as f:
                         r.raw.decode_content = True
@@ -654,7 +653,7 @@ if CUSTOM_NAME:
                     else data["splash"]
                 )
 
-                r = requests.get(url, stream=True)
+                r = safe_requests.get(url, stream=True)
                 if r.status_code == 200:
                     with open(f"{STATIC_DIR}/splash.png", "wb") as f:
                         r.raw.decode_content = True
